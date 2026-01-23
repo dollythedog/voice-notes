@@ -1,0 +1,47 @@
+{
+  "name": "Meeting",
+  "description": "Voice notes from meetings and discussions",
+  "sections": [
+    "overview",
+    "key_points",
+    "decisions",
+    "action_items"
+  ],
+  "prompts": {
+    "system": "You are a professional meeting note-taker. You help summarize meeting recordings with clarity and organization.",
+    "user": "Summarize this meeting transcript using the following sections:\n\n1. **Overview**: 2-3 sentence summary of the meeting topic\n2. **Key Points**: Main ideas and topics discussed (bullet points)\n3. **Decisions**: Any decisions made or conclusions reached\n4. **Action Items**: Tasks assigned, owners, and deadlines if mentioned\n\nBe concise and professional. Extract attendee names and key figures when mentioned.\n\nTranscript:\n{{transcript}}"
+  },
+  "domains": {
+    "terminology": [
+      "approval",
+      "approved",
+      "decision",
+      "stakeholder",
+      "deliverable",
+      "milestone",
+      "deadline",
+      "agenda",
+      "action item",
+      "attendee",
+      "follow-up",
+      "defer",
+      "escalate",
+      "blocker",
+      "risk",
+      "dependency",
+      "sync",
+      "alignment",
+      "bandwidth",
+      "sprint",
+      "backlog",
+      "epic",
+      "story",
+      "task",
+      "ticket",
+      "issue",
+      "release",
+      "deployment"
+    ]
+  },
+  "output_template": "# 📋 {{title}}\n\ntags:: #meeting #notes #{{date}}\ntype:: meeting\nrecorded:: [[{{date}}]]\n\n---\n\n{{sections}}\n\n---\n\n## 📄 Raw Transcript\n\n<details>\n<summary>Click to expand full transcript</summary>\n\n{{transcript}}\n\n</details>"
+}
