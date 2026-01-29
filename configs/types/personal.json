@@ -1,0 +1,13 @@
+{
+  "name": "Personal Note",
+  "description": "Voice notes for personal thoughts, conversations, and reflections",
+  "sections": [
+    "summary"
+  ],
+  "prompts": {
+    "system": "You are a helpful AI assistant that creates detailed, accurate summaries of voice transcripts.",
+    "user": "Write a detailed, accurate, point-by-point summary of the entire transcript.\n\nFor each key point or topic discussed:\n- Start with a clear topic heading\n- Summarize the main ideas and important details\n- Preserve names, specific facts, and context\n- Note any decisions, action items, or outcomes\n\nBe thorough and preserve the substance of the conversation.\n\nTranscript:\n{{transcript}}"
+  },
+  "domains": {},
+  "output_template": "# 💭 {{title}}\n\ntags:: #personal #voice-note #{{date}}\ntype:: personal\nrecorded:: [[{{date}}]]\n\n---\n\n{{sections}}\n\n---\n\n## 📄 Raw Transcript\n\n<details>\n<summary>Click to expand full transcript</summary>\n\n{{transcript}}\n\n</details>"
+}

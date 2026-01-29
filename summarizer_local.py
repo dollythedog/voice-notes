@@ -18,12 +18,17 @@ import re
 from datetime import datetime
 from pathlib import Path
 from typing import Dict, Optional
+from dotenv import load_dotenv
 
 # Add voice_notes to path for imports
 sys.path.insert(0, str(Path(__file__).parent))
 
 import type_manager
 
+
+
+# Load environment variables
+load_dotenv(Path(__file__).parent / ".env")
 
 def correct_transcript_with_domain(transcript: str, domain_dict: Dict) -> str:
     """

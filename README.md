@@ -1,171 +1,156 @@
-# Voice Notes Transcription System
+# Voice Notes Transcription Service v3
 
-## Overview
-Automated voice note transcription system using OpenAI Whisper for Logseq integration.
-
-## Installation Status
-✅ **Phase 1 Complete** - Whisper installed and tested (2025-12-09)
-✅ **Phase 2 Complete** - Transcription service running (2025-12-09)
-
-## Quick Start
-
-### Service Management
-```bash
-# Check if service is running
-sudo systemctl status voice-transcription.service
-
-# View live logs
-sudo journalctl -u voice-transcription.service -f
-
-# Or use helper script
-/srv/voice_notes/service_control.sh status
-/srv/voice_notes/service_control.sh logs
-```
-
-### Testing
-To test the transcription:
-1. Copy an audio file to `/srv/voice_notes/inbox/`
-2. Watch the logs: `sudo journalctl -u voice-transcription.service -f`
-3. Check the output in `/srv/logseq_graph/pages/📥 Voice Inbox.md`
-4. Original file will be moved to `/srv/voice_notes/processed/`
-
-Example formats supported: `.mp3`, `.m4a`, `.wav`, `.ogg`, `.flac`, `.opus`
-
-## Directory Structure
-```
-/srv/voice_notes/
-├── inbox/                   # Drop audio files here (auto-monitored)
-├── processed/               # Completed transcriptions archived here
-├── logs/
-│   └── transcription.log    # Service logs
-├── venv/                    # Python virtual environment
-├── transcribe_service.py    # Main service script
-├── service_control.sh       # Helper management script
-├── manual_test.sh           # Manual testing mode
-└── README.md                # This file
-```
-
-## How It Works
-
-1. **Drop audio file** → `/srv/voice_notes/inbox/`
-2. **Service detects** → File watcher triggers processing
-3. **Whisper transcribes** → ~10-15 seconds for 1-minute audio
-4. **Smart formatting** → Detects TODOs vs regular notes
-5. **Logseq output** → Appends to Voice Inbox page
-6. **Archive** → Moves processed file to `/processed/`
+Automated voice note transcription and AI summarization service with Logseq integration.
 
 ## Features
 
-### Smart Task Detection
-Voice notes containing these keywords become TODOs:
-- "TODO" or "todo"
-- "Need to" / "Have to"
-- "Should" / "Must"
-- "Remember to" / "Remind me"
+- 🎤 **Automatic transcription** using OpenAI Whisper (local)
+- ⏱️ **Timestamped transcripts** for easy navigation of long recordings
+- 🤖 **AI-powered summaries** using OpenAI GPT models
+- 📝 **Multi-type support** - BJJ, meeting, and personal notes with custom prompts
+- 🔄 **Syncthing compatible** - detects files synced from other devices
+- 📚 **Logseq integration** - auto-creates pages and journal entries
+- 🔍 **Startup scanning** - processes existing files on service start
 
-Example:
-- Voice: "TODO Review the project plan with the team"
-- Output: `TODO Review the project plan with the team #voice-note`
+## Quick Start
 
-### Logseq Integration
-All transcriptions append to: `/srv/logseq_graph/pages/📥 Voice Inbox.md`
+### 1. Setup
 
-Format includes:
-- Timestamp (date and time)
-- Original filename
-- Full transcription text
-- Automatic TODO formatting (if detected)
-- Tags: `#voice-note`
-
-## Installed Components
-- Python 3.12.3 virtual environment
-- openai-whisper 20250625
-- watchdog 6.0.0 (file monitoring)
-- python-dotenv 1.2.1
-- torch 2.9.1 (with CUDA support)
-
-## Cached Models
-- `tiny.pt` (73MB) - Testing model
-- `base.pt` (139MB) - Production model ⭐ **Active**
-- Location: `~/.cache/whisper/`
-
-## Performance
-- Model loading: 2 seconds (cached)
-- 1-minute audio: ~10-15 seconds transcription
-- 5-minute audio: ~50-75 seconds transcription
-- Supported languages: English (en) configured
-
-## Service Configuration
-- **Systemd unit:** `/etc/systemd/system/voice-transcription.service`
-- **User:** ivesjl
-- **Auto-start:** Enabled (starts on boot)
-- **Auto-restart:** Yes (10 second delay on failure)
-- **Logging:** systemd journal + `/srv/voice_notes/logs/transcription.log`
-
-## Management Commands
-
-Using helper script (`/srv/voice_notes/service_control.sh`):
 ```bash
-./service_control.sh status      # Show status
-./service_control.sh start       # Start service
-./service_control.sh stop        # Stop service
-./service_control.sh restart     # Restart service
-./service_control.sh logs        # Follow live logs
-./service_control.sh logs-recent # Show last 50 lines
-./service_control.sh test <file> # Test with audio file
+# Install dependencies
+cd /srv/voice_notes
+source venv/bin/activate
+pip install -r requirements.txt
+
+# Configure environment
+cp .env.example .env
+# Edit .env and add your OPENAI_API_KEY
 ```
 
-Direct systemd commands:
+### 2. Configure Note Types
+
+Edit configs in `/srv/voice_notes/configs/types/`:
+- `bjj.json` - Brazilian Jiu-Jitsu training notes
+- `meeting.json` - Meeting notes
+- `personal.json` - Personal voice memos
+
+### 3. Start Service
+
 ```bash
-sudo systemctl status voice-transcription.service
-sudo systemctl start voice-transcription.service
-sudo systemctl stop voice-transcription.service
-sudo systemctl restart voice-transcription.service
-sudo journalctl -u voice-transcription.service -f
+cd /srv/voice_notes
+nohup python transcribe_service_v3.py > logs/transcription.log 2>&1 &
 ```
 
-## Next Steps
-1. ✅ Phase 1: Whisper setup - COMPLETE
-2. ✅ Phase 2: Transcription service - COMPLETE
-3. ⏭️ Phase 3: Test with audio file
-4. ⏭️ Phase 3: Configure Syncthing sync
-5. ⏭️ Phase 3: Set up mobile device
+### 4. Use It
 
-## Documentation
-- Full plan: `/srv/logseq_graph/pages/📱 Voice Notes Integration Plan.md`
-- Service logs: `sudo journalctl -u voice-transcription.service -f`
-- Transcription log: `/srv/voice_notes/logs/transcription.log`
+Drop audio files (`.wav`, `.mp3`, `.m4a`) into:
+- `/srv/voice_notes/inboxes/personal/`
+- `/srv/voice_notes/inboxes/bjj/`
+- `/srv/voice_notes/inboxes/meeting/`
 
-## Troubleshooting
+Files are automatically:
+1. Transcribed with timestamps
+2. Summarized with AI
+3. Saved to Logseq pages
+4. Archived
 
-### Service not running
-```bash
-sudo systemctl status voice-transcription.service
-sudo journalctl -u voice-transcription.service -n 50
-```
+## Output Format
 
-### Audio file not processing
-1. Check file is in `/srv/voice_notes/inbox/`
-2. Check file format is supported (mp3, m4a, wav, etc.)
-3. Check service is running: `systemctl is-active voice-transcription.service`
-4. Watch logs: `sudo journalctl -u voice-transcription.service -f`
+```markdown
+# 💭 Filename
 
-### Low transcription accuracy
-- Speak clearly and slowly
-- Reduce background noise
-- Use higher quality audio format
-- Consider upgrading model: edit `/srv/voice_notes/transcribe_service.py`
-  - Change `model = whisper.load_model("base")` to `"small"` or `"medium"`
-
-## System Requirements
-- ✅ Python 3.11+ (we have 3.12.3)
-- ✅ 2GB+ RAM available (we have 2.8GB)
-- ✅ 1GB+ disk space for models (we have 32GB)
-- ✅ ffmpeg for audio processing
-- ✅ Network access for initial model download
+tags:: #personal #voice-note #2026-01-29
+type:: personal
+recorded:: [[2026-01-29]]
 
 ---
 
-**Created:** 2025-12-09  
-**Status:** Phase 2 Complete - Service Active 🟢  
-**Ready for:** Audio file testing & mobile integration
+## Summary
+- Main points extracted from conversation
+- Action items and decisions
+- Key insights
+
+---
+
+## 📄 Raw Transcript
+
+<details>
+<summary>Click to expand full transcript</summary>
+
+(0:00) Opening remarks and context.
+(0:15) Main discussion points.
+(0:45) Follow-up and clarifications.
+
+</details>
+```
+
+## Configuration
+
+### Environment Variables (.env)
+```bash
+OPENAI_API_KEY=sk-...
+```
+
+### Type Configurations
+
+Each note type has a config file with:
+- **prompts**: System and user prompts for AI summarization
+- **domains**: Domain-specific terminology for transcript correction
+- **sections**: Output sections for the summary
+- **output_template**: Markdown template for the final output
+
+## Troubleshooting
+
+### Summaries not generating
+- Check `.env` file exists with valid `OPENAI_API_KEY`
+- Verify service has loaded environment: `ps eww -p <pid> | grep OPENAI`
+- Check logs: `tail -f /srv/voice_notes/logs/transcription.log`
+
+### Files not processing
+- Ensure file extensions are supported (`.wav`, `.mp3`, `.m4a`)
+- Check file is stable (not being written) - service waits 3 seconds
+- Restart service to trigger startup scan: `pkill -f transcribe_service_v3; python transcribe_service_v3.py`
+
+### Syncthing files not detected
+- Service now handles `on_modified` and `on_moved` events
+- Files should process automatically when sync completes
+- If not, service restart will trigger startup scan
+
+## Architecture
+
+```
+voice_notes/
+├── transcribe_service_v3.py   # Main service (file watcher)
+├── summarizer_local.py         # AI summarization
+├── type_manager.py             # Type config loader
+├── .env                        # API keys (not in git)
+├── inboxes/                    # Drop files here
+│   ├── personal/
+│   ├── bjj/
+│   └── meeting/
+├── configs/
+│   └── types/                  # Type configurations
+│       ├── personal.json
+│       ├── bjj.json
+│       └── meeting.json
+├── archive/                    # Processed files
+│   ├── personal/done/
+│   └── personal/failed/
+└── logs/
+    └── transcription.log       # Service logs
+```
+
+## Recent Updates (2026-01-29)
+
+See [CHANGELOG.md](CHANGELOG.md) for full details.
+
+**Major Fixes:**
+- ✅ AI summaries now work for all note types
+- ✅ Timestamps in transcripts for readability
+- ✅ Syncthing file detection fixed
+- ✅ Startup file scanning added
+- ✅ Environment variable loading fixed
+
+## License
+
+Private project
