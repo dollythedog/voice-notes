@@ -313,6 +313,29 @@ cat /srv/voice_notes/archive/bjj/failed/*_error.txt
 
 ---
 
+
+---
+
+## Recent Updates (v3.1 - 2026-01-31)
+
+### Critical Bug Fixes
+- ✅ **Logseq Metadata Integration** - Fixed missing `tags::`, `recorded::`, and `processed::` properties that prevented notes from appearing in Logseq queries
+- ✅ **AI Summary Generation** - Resolved subprocess Python execution to use venv, enabling OpenAI API access
+- ✅ **Note Type Tagging** - Fixed parameter passing to correctly tag notes as #meeting, #bjj, or #personal
+- ✅ **Performance Optimization** - Implemented transcript splitting (100 lines/section) to prevent Logseq performance issues
+- ✅ **Outliner Format Compliance** - Formatted transcript lines as Logseq bullets for proper editing behavior
+
+### Impact
+- Long meeting transcripts (800+ lines) now split into manageable chunks
+- All notes appear correctly in Logseq queries
+- AI summaries generate successfully with detailed meeting sections
+- Significant performance improvement in Logseq with large transcripts
+
+### Files Modified
+- `transcribe_service_v3.py` - Updated subprocess call and fallback format
+- `summarizer_local.py` - Added transcript splitting and bullet formatting
+- `configs/types/meeting.json` - Enhanced meeting prompts and terminology
+
 ## Support
 
 Questions or issues? Check:
@@ -325,5 +348,5 @@ Questions or issues? Check:
 
 **Deployment Status:** ✅ Production Ready
 
-**Last Updated:** 2025-01-22
-**Version:** v3.0
+**Last Updated:** 2026-01-31
+**Version:** v3.1

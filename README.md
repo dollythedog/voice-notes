@@ -12,6 +12,23 @@ Automated voice note transcription and AI summarization service with Logseq inte
 - 📚 **Logseq integration** - auto-creates pages and journal entries
 - 🔍 **Startup scanning** - processes existing files on service start
 
+
+## Recent Updates (2026-01-31)
+
+### Critical Fixes
+- ✅ **Logseq metadata integration** - Fixed missing `tags::`, `recorded::`, and `processed::` properties that prevented notes from appearing in Logseq queries
+- ✅ **AI summary generation** - Resolved subprocess call to use virtual environment Python, ensuring OpenAI API access works correctly
+- ✅ **Note type tagging** - Fixed note_type parameter passing to correctly tag notes as `#meeting`, `#bjj`, or `#personal`
+- ✅ **Performance optimization** - Implemented automatic transcript splitting (100 lines per section) to prevent Logseq performance degradation with long recordings
+- ✅ **Outliner formatting** - Formatted transcript lines as Logseq bullets (`- ` prefix) for proper editing behavior
+
+### Impact
+Long meeting transcripts (800+ lines) are now:
+- Split into manageable 100-line sections within collapsible `<details>` blocks
+- Formatted as proper Logseq bullets for individual line editing
+- Include complete metadata headers for query integration
+- Generate AI summaries successfully with detailed meeting sections
+
 ## Quick Start
 
 ### 1. Setup
