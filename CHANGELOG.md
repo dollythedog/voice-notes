@@ -37,3 +37,20 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/).
 - Initial multi-stage summarization
 - Domain-specific corrections
 - Logseq integration
+
+### Fixed - 2026-01-31
+- **Missing Logseq metadata in meeting notes**: Fixed fallback format to include proper `tags::`, `recorded::`, and `processed:: false` properties so notes appear in Logseq queries
+- **AI summary not generated**: Fixed subprocess call to use `sys.executable` instead of hardcoded `python3`, ensuring the venv's Python interpreter with required packages (openai, python-dotenv) is used
+- **Note type tag extraction**: Fixed note_type parameter passing in `summarizer_local.py` to correctly tag notes (e.g., `#meeting`, `#bjj`, `#personal`) instead of blank tags
+- **Logseq performance issues with long transcripts**: Implemented transcript splitting into chunks of 100 lines per collapsible section to prevent performance degradation
+- **Transcript not in outliner format**: Fixed transcript formatting to prefix each line with `- ` so Logseq treats them as separate editable blocks instead of a single uneditable blob
+
+### Changed - 2026-01-31
+- Updated `transcribe_service_v3.py`:
+  - Changed subprocess call from `"python3"` to `sys.executable`
+  - Enhanced `_format_fallback()` to include full Logseq metadata header
+- Updated `summarizer_local.py`:
+  - Modified `format_output_logseq()` to accept `note_type` as parameter
+  - Added transcript line formatting as Logseq bullets (`- ` prefix)
+  - Implemented automatic transcript splitting for transcripts >100 lines
+  - Fixed note type tag to use passed parameter instead of extracting from filename path

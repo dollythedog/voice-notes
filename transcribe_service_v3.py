@@ -174,7 +174,7 @@ class VoiceNoteHandler(FileSystemEventHandler):
         try:
             env = os.environ.copy()
             result = subprocess.run(
-                ["python3", str(BASE_DIR / "summarizer_local.py"), note_type, filename],
+                [sys.executable, str(BASE_DIR / "summarizer_local.py"), note_type, filename],
                 input=transcript,
                 capture_output=True,
                 text=True,
@@ -192,6 +192,32 @@ class VoiceNoteHandler(FileSystemEventHandler):
             return self._format_fallback(transcript, filename)
     
     def _format_fallback(self, transcript: str, filename: str) -> str:
+        """Fallback format if summarization fails."""
+        date = datetime.now().strftime("%Y-%m-%d")
+        title = Path(filename).stem
+        
+        # Format with proper Logseq metadata
+        return f"""# 🎙️ {title}
+
+tags:: #voice-note #{self.note_type} #inbox
+recorded:: [[{date}]]
+processed:: false
+
+---
+
+## Summary
+- Unable to generate AI summary. See raw transcript below.
+
+---
+
+## 📄 Raw Transcript
+
+<details>
+<summary>Click to expand full transcript</summary>
+
+{transcript}
+
+</details>"""
         """Fallback format if summarization fails."""
         date = datetime.now().strftime("%Y-%m-%d")
         return f"""## Summary

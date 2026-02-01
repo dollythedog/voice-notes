@@ -128,6 +128,7 @@ def format_output_logseq(
     summary: str,
     transcript: str,
     filename: str,
+    note_type: str,
     config: Dict
 ) -> str:
     """
@@ -136,6 +137,8 @@ def format_output_logseq(
     - Tab-indented hierarchy
     - No empty lines between bullets
     - Correct heading structure
+    - Transcript formatted as Logseq bullets
+    - Long transcripts split into multiple sections
     """
     
     # Create title from filename
@@ -144,7 +147,7 @@ def format_output_logseq(
     title = re.sub(r'[_\-]+', ' ', title)
     
     date = datetime.now().strftime("%Y-%m-%d")
-    note_type_tag = Path(filename).parent.name  # bjj, meeting, etc.
+    note_type_tag = note_type  # Passed as parameter
     
     # Build output following Logseq rules
     output_lines = []
@@ -174,15 +177,41 @@ def format_output_logseq(
     output_lines.append("---")
     output_lines.append("")  # Blank line
     
-    # Raw transcript in collapsible details
+    # Raw transcript - format as bullets and split if too long
     output_lines.append("## 📄 Raw Transcript")
     output_lines.append("")
-    output_lines.append("<details>")
-    output_lines.append("<summary>Click to expand full transcript</summary>")
-    output_lines.append("")
-    output_lines.append(transcript)
-    output_lines.append("")
-    output_lines.append("</details>")
+    
+    # Format transcript lines as Logseq bullets
+    transcript_lines = transcript.split("\n")
+    transcript_bullets = [f"- {line}" for line in transcript_lines if line.strip()]
+    
+    # Split into chunks if too long (100 lines per section to avoid performance issues)
+    LINES_PER_SECTION = 100
+    total_lines = len(transcript_bullets)
+    
+    if total_lines <= LINES_PER_SECTION:
+        # Single section
+        output_lines.append("<details>")
+        output_lines.append("<summary>Click to expand full transcript</summary>")
+        output_lines.append("")
+        output_lines.extend(transcript_bullets)
+        output_lines.append("")
+        output_lines.append("</details>")
+    else:
+        # Multiple sections
+        num_sections = (total_lines + LINES_PER_SECTION - 1) // LINES_PER_SECTION
+        for section_num in range(num_sections):
+            start_idx = section_num * LINES_PER_SECTION
+            end_idx = min((section_num + 1) * LINES_PER_SECTION, total_lines)
+            section_lines = transcript_bullets[start_idx:end_idx]
+            
+            output_lines.append("<details>")
+            output_lines.append(f"<summary>Click to expand transcript (Part {section_num + 1} of {num_sections})</summary>")
+            output_lines.append("")
+            output_lines.extend(section_lines)
+            output_lines.append("")
+            output_lines.append("</details>")
+            output_lines.append("")  # Blank line between sections
     
     return "\n".join(output_lines)
 
@@ -270,7 +299,7 @@ def main():
         summary = generate_summary(transcript, note_type, config, filename)
         
         # Step 3: Format output for Logseq
-        output = format_output_logseq(summary, transcript, filename, config)
+        output = format_output_logseq(summary, transcript, filename, note_type, config)
         
         # Output to stdout
         print(output)
